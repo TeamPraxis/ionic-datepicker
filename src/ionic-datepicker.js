@@ -23,8 +23,6 @@ app.directive('ionicDatepicker', ['$ionicPopup', 'DatepickerService', function (
     link: function (scope, element, attrs) {
 
       scope.datePickerTitle = scope.title || 'Select Date';
-
-      //var monthsList = DatepickerService.monthsList;
       var monthsList = [
         {
           id: 0, name: 'January'

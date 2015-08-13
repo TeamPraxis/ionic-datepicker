@@ -97,19 +97,21 @@ app.directive('ionicDatepicker', ['$ionicPopup', 'DatepickerService', function (
       scope.weekNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
       scope.today = {};
 
-      var tempTodayObj = new Date();
-      var tempToday = new Date(tempTodayObj.getFullYear(), tempTodayObj.getMonth(), tempTodayObj.getDate());
-
-      scope.today = {
-        dateObj: tempTodayObj,
-        date: tempToday.getDate(),
-        month: tempToday.getMonth(),
-        year: tempToday.getFullYear(),
-        day: tempToday.getDay(),
-        dateString: tempToday.toString(),
-        epochLocal: tempToday.getTime(),
-        epochUTC: (tempToday.getTime() + (tempToday.getTimezoneOffset() * 60 * 1000))
+      var getDateObject = function (date) {
+        var tempDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        return {
+          dateObj: date,
+          date: tempDate.getDate(),
+          month: tempDate.getMonth(),
+          year: tempDate.getFullYear(),
+          day: tempDate.getDay(),
+          dateString: tempDate.toString(),
+          epochLocal: tempDate.getTime(),
+          epochUTC: (tempDate.getTime() + (tempDate.getTimezoneOffset() * 60 * 1000))
+        };
       };
+
+      scope.today = getDateObject(new Date());
 
       var refreshDateList = function (current_date) {
         current_date.setHours(0);
@@ -117,7 +119,6 @@ app.directive('ionicDatepicker', ['$ionicPopup', 'DatepickerService', function (
         current_date.setSeconds(0);
         current_date.setMilliseconds(0);
 
-        //scope.selctedDateString = (new Date(current_date)).toString();
         currentDate = angular.copy(current_date);
 
         var firstDay = new Date(current_date.getFullYear(), current_date.getMonth(), 1).getDate();
@@ -206,11 +207,17 @@ app.directive('ionicDatepicker', ['$ionicPopup', 'DatepickerService', function (
       };
 
       element.on("click", function () {
+        var defaultDate = new Date();
         if (!scope.ipDate) {
-          var defaultDate = new Date();
           refreshDateList(defaultDate);
         } else {
-          refreshDateList(angular.copy(scope.ipDate));
+          defaultDate = angular.copy(scope.ipDate);
+          refreshDateList(defaultDate);
+        }
+
+        // set the current date if not selected
+        if (!scope.date_selection.selected) {
+          scope.dateSelected(getDateObject(defaultDate));
         }
 
         $ionicPopup.show({

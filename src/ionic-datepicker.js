@@ -8,7 +8,7 @@ app.service('DatepickerService', function () {
 
 });
 
-app.directive('ionicDatepicker', ['$ionicPopup', 'DatepickerService', function ($ionicPopup, DatepickerService) {
+app.directive('ionicDatepicker', ['$ionicPopup', '$injector', function ($ionicPopup, $injector) {
   return {
     restrict: 'AE',
     replace: true,
@@ -18,9 +18,10 @@ app.directive('ionicDatepicker', ['$ionicPopup', 'DatepickerService', function (
       disableFutureDates: '=disablefuturedates',
       callback: '=callback',
       title: '=title',
-      disabledDates: '=?disableddates'
+      disabledDates: '=?disableddates',
+      timezone: '=timezone'
     },
-    link: function (scope, element, attrs) {
+    link: function (scope, element) {
 
       scope.datePickerTitle = scope.title || 'Select Date';
       var monthsList = [
@@ -111,7 +112,13 @@ app.directive('ionicDatepicker', ['$ionicPopup', 'DatepickerService', function (
         };
       };
 
-      scope.today = getDateObject(new Date());
+      if (scope.timezone && $injector.has('moment')) {
+        var moment = $injector.get('moment');
+        var dt = moment().tz(scope.timezone);
+        scope.today = getDateObject(new Date(dt.year(), dt.month(), dt.date()));
+      } else {
+        scope.today = getDateObject(new Date());
+      }
 
       var refreshDateList = function (current_date) {
         current_date.setHours(0);
@@ -236,7 +243,14 @@ app.directive('ionicDatepicker', ['$ionicPopup', 'DatepickerService', function (
               text: 'Today',
               onTap: function (e) {
 
-                var today = new Date();
+                var today;
+                if (scope.timezone && $injector.has('moment')) {
+                  var moment = $injector.get('moment');
+                  var dt = moment().tz(scope.timezone);
+                  today = new Date(dt.year(), dt.month(), dt.date());
+                } else {
+                  today = new Date();
+                }
                 today.setHours(0);
                 today.setMinutes(0);
                 today.setSeconds(0);
